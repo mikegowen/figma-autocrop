@@ -18,7 +18,6 @@ class Autocrop {
   }
 
   _getImagePaint() {
-      console.log(typeof this.fills[0])
       return this.fills.find(paint => paint.type === 'IMAGE')
   }
 
