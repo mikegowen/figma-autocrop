@@ -1,11 +1,11 @@
-import Autocrop from './autocrop'
+import Autocropper from './autocropper'
 
 const selection = figma.currentPage.selection
 
 selection.forEach(node => {
-  if (Autocrop.isValidNode(node)) {
-    const autocrop = new Autocrop(node, 200)
-    autocrop.crop().then(() => {
+  if (Autocropper.isValidNode(node)) {
+    const autocropper = new Autocropper(node, 200)
+    autocropper.crop().then(() => {
       figma.closePlugin()
     })
   } else {

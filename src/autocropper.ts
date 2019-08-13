@@ -1,4 +1,4 @@
-class Autocrop {
+class Autocropper {
   node: RectangleNode
   noiseThreshold: number
   fills: Array<Paint>
@@ -66,4 +66,4 @@ class Autocrop {
   }
 }
 
-export default Autocrop
+export default Autocropper
