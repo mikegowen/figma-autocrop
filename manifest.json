@@ -1,0 +1,7 @@
+{
+  "name": "Autocrop Image",
+  "id": "740702788263758004",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "ui": "dist/ui.html"
+}
