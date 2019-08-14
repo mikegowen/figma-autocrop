@@ -57,7 +57,7 @@ class Autocropper {
     figma.ui.postMessage({ imageBytes: imageBytes, noiseThreshold: this.noiseThreshold })
 
     this.cropDescription = await new Promise((resolve, reject) => {
-    figma.ui.onmessage = value => resolve(value)
+      figma.ui.onmessage = value => resolve(value)
     })
 
     this._replaceExistingImagePaint()
