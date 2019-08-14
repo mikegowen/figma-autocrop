@@ -6,7 +6,6 @@ class Autocropper {
   fills: Array<Paint>
   imagePaint: ImagePaint
   imagePaintIndex: number
-  image: Image
   cropDescription: { croppedImageBytes: Uint8Array, cropWidth: number, cropHeight: number }
 
   constructor(node, noiseThreshold) {
@@ -15,7 +14,10 @@ class Autocropper {
     this.fills = [...node.fills]
     this.imagePaint = this._getImagePaint() as ImagePaint // TODO Not sure why I need to do this
     this.imagePaintIndex = this._getImagePaintIndex()
-    this.image = figma.getImageByHash(this.imagePaint.imageHash)
+  }
+
+  get image() {
+    return figma.getImageByHash(this.imagePaint.imageHash)
   }
 
   async _getWorkerHTML() {
