@@ -16,7 +16,6 @@ class Autocropper {
     this.imagePaint = this._getImagePaint() as ImagePaint // TODO Not sure why I need to do this
     this.imagePaintIndex = this._getImagePaintIndex()
     this.image = figma.getImageByHash(this.imagePaint.imageHash)
-    this.cropDescription = null // TODO Probably not right
   }
 
   async _getWorkerHTML() {
