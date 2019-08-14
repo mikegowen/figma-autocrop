@@ -1,3 +1,5 @@
+import autocropperWorker from './autocropper-worker.html'
+
 class Autocropper {
   node: RectangleNode
   noiseThreshold: number
@@ -17,6 +19,10 @@ class Autocropper {
     this.cropDescription = null // TODO Probably not right
   }
 
+  async _getWorkerHTML() {
+    return autocropperWorker
+  }
+
   _getImagePaint() {
     return this.fills.find(paint => paint.type === 'IMAGE')
   }
@@ -26,7 +32,7 @@ class Autocropper {
   }
 
   _getNewPaint() {
-    let newPaint = JSON.parse(JSON.stringify(this.imagePaint))
+    let newPaint = JSON.parse(JSON.stringify(this.imagePaint)) // TODO Swap const in for let where applicable
     let newImage = figma.createImage(this.cropDescription.croppedImageBytes)
     newPaint.imageHash = newImage.hash
     return newPaint
@@ -44,9 +50,10 @@ class Autocropper {
   }
 
   async crop() {
+    const workerHTML = await this._getWorkerHTML()
     const imageBytes = await this.image.getBytesAsync()
 
-    figma.showUI(__html__, { visible: false })
+    figma.showUI(workerHTML, { visible: false })
     figma.ui.postMessage({ imageBytes: imageBytes, noiseThreshold: this.noiseThreshold })
 
     this.cropDescription = await new Promise((resolve, reject) => {
