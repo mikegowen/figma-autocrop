@@ -20,7 +20,7 @@ class Autocropper {
     return figma.getImageByHash(this.imagePaint.imageHash)
   }
 
-  async _getWorkerHTML() {
+  _getWorkerHTML() {
     return autocropperWorker
   }
 
