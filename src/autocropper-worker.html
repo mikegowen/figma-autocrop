@@ -4,8 +4,15 @@
       this.imageBytes = imageBytes // TODO Underscore properties that are private everywhere
       this.noiseThreshold = noiseThreshold
       this.canvas = document.createElement('canvas')
-      this.context = this.canvas.getContext('2d') // TODO Can I immediately use this.canvas?
       this.image = image
+    }
+
+    get context() {
+      return this.canvas.getContext('2d')
+    }
+
+    set context(newContext) {
+      this.context = newContext
     }
 
     async getCroppedCanvas() {
