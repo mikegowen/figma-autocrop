@@ -1,23 +1,23 @@
 import autocropperWorker from './autocropper-worker.html'
 
 class Autocropper {
-  node: RectangleNode
-  noiseThreshold: number
-  fills: Array<Paint>
-  imagePaint: ImagePaint
-  imagePaintIndex: number
-  cropDescription: { croppedImageBytes: Uint8Array, cropWidth: number, cropHeight: number }
+  _node: RectangleNode
+  _noiseThreshold: number
+  _fills: Array<Paint>
+  _imagePaint: ImagePaint
+  _imagePaintIndex: number
+  _cropDescription: { croppedImageBytes: Uint8Array, cropWidth: number, cropHeight: number }
 
   constructor(node, noiseThreshold) {
-    this.node = node
-    this.noiseThreshold = noiseThreshold
-    this.fills = [...node.fills]
-    this.imagePaint = this._getImagePaint() as ImagePaint // TODO Not sure why I need to do this
-    this.imagePaintIndex = this._getImagePaintIndex()
+    this._node = node
+    this._noiseThreshold = noiseThreshold
+    this._fills = [...node.fills]
+    this._imagePaint = this._getImagePaint() as ImagePaint // TODO Not sure why I need to do this
+    this._imagePaintIndex = this._getImagePaintIndex()
   }
 
-  get image() {
-    return figma.getImageByHash(this.imagePaint.imageHash)
+  get _image() {
+    return figma.getImageByHash(this._imagePaint.imageHash)
   }
 
   _getWorkerHTML() {
@@ -25,39 +25,39 @@ class Autocropper {
   }
 
   _getImagePaint() {
-    return this.fills.find(paint => paint.type === 'IMAGE')
+    return this._fills.find(paint => paint.type === 'IMAGE')
   }
 
   _getImagePaintIndex() {
-    return this.fills.findIndex(paint => paint === this.imagePaint)
+    return this._fills.findIndex(paint => paint === this._imagePaint)
   }
 
   _getNewPaint() {
-    const newPaint = JSON.parse(JSON.stringify(this.imagePaint))
-    const newImage = figma.createImage(this.cropDescription.croppedImageBytes)
+    const newPaint = JSON.parse(JSON.stringify(this._imagePaint))
+    const newImage = figma.createImage(this._cropDescription.croppedImageBytes)
     newPaint.imageHash = newImage.hash
     return newPaint
   }
 
   _replaceExistingImagePaint() { // TODO Not pure
     const newPaint = this._getNewPaint()
-    this.fills.splice(this.imagePaintIndex, 1, newPaint);
+    this._fills.splice(this._imagePaintIndex, 1, newPaint);
   }
 
   _cropAndPaintNode() { // TODO Not pure
-    this.node.fills = []
-    this.node.resize(this.cropDescription.cropWidth, this.cropDescription.cropHeight)
-    this.node.fills = this.fills
+    this._node.fills = []
+    this._node.resize(this._cropDescription.cropWidth, this._cropDescription.cropHeight)
+    this._node.fills = this._fills
   }
 
   async crop() {
     const workerHTML = await this._getWorkerHTML()
-    const imageBytes = await this.image.getBytesAsync()
+    const imageBytes = await this._image.getBytesAsync()
 
     figma.showUI(workerHTML, { visible: false })
-    figma.ui.postMessage({ imageBytes: imageBytes, noiseThreshold: this.noiseThreshold })
+    figma.ui.postMessage({ imageBytes: imageBytes, noiseThreshold: this._noiseThreshold })
 
-    this.cropDescription = await new Promise((resolve, reject) => {
+    this._cropDescription = await new Promise((resolve, reject) => {
       figma.ui.onmessage = value => resolve(value)
     })
 

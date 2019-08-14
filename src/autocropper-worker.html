@@ -1,32 +1,32 @@
 <script>
   class AutocropperWorker {
     constructor(image, imageBytes, noiseThreshold) {
-      this.imageBytes = imageBytes // TODO Underscore properties that are private everywhere
-      this.noiseThreshold = noiseThreshold
-      this.canvas = document.createElement('canvas')
-      this.image = image
+      this._imageBytes = imageBytes
+      this._noiseThreshold = noiseThreshold
+      this._canvas = document.createElement('canvas')
+      this._image = image
     }
 
-    get context() {
-      return this.canvas.getContext('2d')
+    get _context() {
+      return this._canvas.getContext('2d')
     }
 
-    set context(newContext) {
-      this.context = newContext
+    set _context(newContext) {
+      this._context = newContext
     }
 
     async getCroppedCanvas() {
-      this.canvas.width = this.image.width
-      this.canvas.height = this.image.height
-      this.context.drawImage(this.image, 0, 0)
+      this._canvas.width = this._image.width
+      this._canvas.height = this._image.height
+      this._context.drawImage(this._image, 0, 0)
 
-      const imageData = this.context.getImageData(0, 0, this.image.width, this.image.height)
+      const imageData = this._context.getImageData(0, 0, this._image.width, this._image.height)
       const cropMetrics = this._getCropMetrics(imageData)
 
-      this.canvas.width = cropMetrics.cropWidth
-      this.canvas.height = cropMetrics.cropHeight
-      this.context.drawImage(
-        this.image,
+      this._canvas.width = cropMetrics.cropWidth
+      this._canvas.height = cropMetrics.cropHeight
+      this._context.drawImage(
+        this._image,
         cropMetrics.leftCropWidth,
         cropMetrics.topCropHeight,
         cropMetrics.cropWidth,
@@ -36,7 +36,7 @@
         cropMetrics.cropWidth,
         cropMetrics.cropHeight
       )
-      return this.canvas
+      return this._canvas
     }
 
     _getCropMetrics(imageData) {
@@ -50,28 +50,28 @@
         bottomCropHeight: bottomCropHeight,
         leftCropWidth: leftCropWidth,
         rightCropWidth: rightCropWidth,
-        cropWidth: this.image.width - (rightCropWidth + leftCropWidth),
-        cropHeight: this.image.height - (bottomCropHeight + topCropHeight)
+        cropWidth: this._image.width - (rightCropWidth + leftCropWidth),
+        cropHeight: this._image.height - (bottomCropHeight + topCropHeight)
       }
     }
 
     _isWhiteAt(x, y, imageData) {
       const [redIndex, greenIndex, blueIndex, alphaIndex] = this._getColorIndicesForPoint(x, y)
 
-      return imageData.data[redIndex] > this.noiseThreshold
-        && imageData.data[blueIndex] > this.noiseThreshold
-        && imageData.data[greenIndex] > this.noiseThreshold
+      return imageData.data[redIndex] > this._noiseThreshold
+        && imageData.data[blueIndex] > this._noiseThreshold
+        && imageData.data[greenIndex] > this._noiseThreshold
     }
 
     _getColorIndicesForPoint(x, y) {
-      const red = y * (this.image.width * 4) + x * 4;
+      const red = y * (this._image.width * 4) + x * 4;
       return [red, red + 1, red + 2, red + 3];
     }
 
     _getTopCropHeight(imageData) {
       let height = 0
-      for (let y = 0; y < this.image.height; y++) {
-        for (let x = 0; x < this.image.width; x++) {
+      for (let y = 0; y < this._image.height; y++) {
+        for (let x = 0; x < this._image.width; x++) {
           if (!this._isWhiteAt(x, y, imageData)) {
             return height // TODO Handle when height == image.height
           }
@@ -82,8 +82,8 @@
 
     _getBottomCropHeight(imageData) {
       let height = 0
-      for (let y = this.image.height - 1; y >= 0; y--) {
-        for (let x = this.image.width - 1; x >= 0; x--) {
+      for (let y = this._image.height - 1; y >= 0; y--) {
+        for (let x = this._image.width - 1; x >= 0; x--) {
           if (!this._isWhiteAt(x, y, imageData)) {
             return height // TODO Handle when height == image.height
           }
@@ -94,8 +94,8 @@
 
     _getLeftCropWidth(imageData) {
       let width = 0
-      for (let x = 0; x < this.image.width; x++) {
-        for (let y = 0; y < this.image.height; y++) {
+      for (let x = 0; x < this._image.width; x++) {
+        for (let y = 0; y < this._image.height; y++) {
           if (!this._isWhiteAt(x, y, imageData)) {
             return width // TODO Handle when width == image.width
           }
@@ -106,8 +106,8 @@
 
     _getRightCropWidth(imageData) {
       let width = 0
-      for (let x = this.image.width - 1; x >= 0; x--) {
-        for (let y = this.image.height - 1; y >= 0 ; y--) {
+      for (let x = this._image.width - 1; x >= 0; x--) {
+        for (let y = this._image.height - 1; y >= 0 ; y--) {
           if (!this._isWhiteAt(x, y, imageData)) {
             return width // TODO Handle when width == image.width
           }
