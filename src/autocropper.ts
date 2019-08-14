@@ -31,8 +31,8 @@ class Autocropper {
   }
 
   _getNewPaint() {
-    let newPaint = JSON.parse(JSON.stringify(this.imagePaint)) // TODO Swap const in for let where applicable
-    let newImage = figma.createImage(this.cropDescription.croppedImageBytes)
+    const newPaint = JSON.parse(JSON.stringify(this.imagePaint))
+    const newImage = figma.createImage(this.cropDescription.croppedImageBytes)
     newPaint.imageHash = newImage.hash
     return newPaint
   }
@@ -64,7 +64,7 @@ class Autocropper {
   }
 
   static isValidNode(node) {
-    let imagePaintCount = node.fills.filter(paint => paint.type === 'IMAGE').length
+    const imagePaintCount = node.fills.filter(paint => paint.type === 'IMAGE').length
     if (imagePaintCount > 1) {
     return false
     }

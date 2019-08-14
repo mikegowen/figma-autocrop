@@ -49,7 +49,7 @@
     }
 
     _isWhiteAt(x, y, imageData) {
-      let [redIndex, greenIndex, blueIndex, alphaIndex] = this._getColorIndicesForPoint(x, y)
+      const [redIndex, greenIndex, blueIndex, alphaIndex] = this._getColorIndicesForPoint(x, y)
 
       return imageData.data[redIndex] > this.noiseThreshold
         && imageData.data[blueIndex] > this.noiseThreshold
@@ -57,14 +57,14 @@
     }
 
     _getColorIndicesForPoint(x, y) {
-      let red = y * (this.image.width * 4) + x * 4;
+      const red = y * (this.image.width * 4) + x * 4;
       return [red, red + 1, red + 2, red + 3];
     }
 
     _getTopCropHeight(imageData) {
-      var height = 0
-      for (var y = 0; y < this.image.height; y++) {
-        for (var x = 0; x < this.image.width; x++) {
+      let height = 0
+      for (let y = 0; y < this.image.height; y++) {
+        for (let x = 0; x < this.image.width; x++) {
           if (!this._isWhiteAt(x, y, imageData)) {
             return height // TODO Handle when height == image.height
           }
@@ -74,9 +74,9 @@
     }
 
     _getBottomCropHeight(imageData) {
-      var height = 0
-      for (var y = this.image.height - 1; y >= 0; y--) {
-        for (var x = this.image.width - 1; x >= 0; x--) {
+      let height = 0
+      for (let y = this.image.height - 1; y >= 0; y--) {
+        for (let x = this.image.width - 1; x >= 0; x--) {
           if (!this._isWhiteAt(x, y, imageData)) {
             return height // TODO Handle when height == image.height
           }
@@ -86,9 +86,9 @@
     }
 
     _getLeftCropWidth(imageData) {
-      var width = 0
-      for (var x = 0; x < this.image.width; x++) {
-        for (var y = 0; y < this.image.height; y++) {
+      let width = 0
+      for (let x = 0; x < this.image.width; x++) {
+        for (let y = 0; y < this.image.height; y++) {
           if (!this._isWhiteAt(x, y, imageData)) {
             return width // TODO Handle when width == image.width
           }
@@ -98,9 +98,9 @@
     }
 
     _getRightCropWidth(imageData) {
-      var width = 0
-      for (var x = this.image.width - 1; x >= 0; x--) {
-        for (var y = this.image.height - 1; y >= 0 ; y--) {
+      let width = 0
+      for (let x = this.image.width - 1; x >= 0; x--) {
+        for (let y = this.image.height - 1; y >= 0 ; y--) {
           if (!this._isWhiteAt(x, y, imageData)) {
             return width // TODO Handle when width == image.width
           }
@@ -114,7 +114,7 @@
     static async encodeCanvasToImageBytes(canvas) {
       return await new Promise((resolve, reject) => {
         canvas.toBlob(blob => {
-          let reader = new FileReader()
+          const reader = new FileReader()
           reader.onload = () => resolve(new Uint8Array(reader.result))
           reader.onerror = () => reject(new Error('Could not read from blob'))
           reader.readAsArrayBuffer(blob)
@@ -123,8 +123,8 @@
     }
 
     static async decodeImageBytesToImage(imageBytes) {
-      let url = URL.createObjectURL(new Blob([imageBytes]))
-      let image = await new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(new Blob([imageBytes]))
+      const image = await new Promise((resolve, reject) => {
         let img = new Image()
         img.onload = () => resolve(img)
         img.onerror = () => reject()
