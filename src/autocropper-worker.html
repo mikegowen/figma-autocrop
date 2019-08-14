@@ -3,23 +3,23 @@
     constructor(imageBytes, noiseThreshold) {
       this.imageBytes = imageBytes // TODO Underscore properties that are private everywhere
       this.noiseThreshold = noiseThreshold
+      this.canvas = document.createElement('canvas')
+      this.context = this.canvas.getContext('2d') // TODO Can I immediately use this.canvas?
     }
 
     async crop() {
-      const canvas = document.createElement('canvas')
-      const context = canvas.getContext('2d')
-      const image = await this._decode(this.imageBytes)
-    
-      canvas.width = image.width
-      canvas.height = image.height
-      context.drawImage(image, 0, 0)
+      const image = await this._decode()
 
-      const imageData = context.getImageData(0, 0, image.width, image.height)
-      const cropMetrics = this._getCropMetrics(image, imageData, this.noiseThreshold)
+      this.canvas.width = image.width
+      this.canvas.height = image.height
+      this.context.drawImage(image, 0, 0)
 
-      canvas.width = cropMetrics.cropWidth
-      canvas.height = cropMetrics.cropHeight
-      context.drawImage(
+      const imageData = this.context.getImageData(0, 0, image.width, image.height)
+      const cropMetrics = this._getCropMetrics(image, imageData)
+
+      this.canvas.width = cropMetrics.cropWidth
+      this.canvas.height = cropMetrics.cropHeight
+      this.context.drawImage(
         image,
         cropMetrics.leftCropWidth,
         cropMetrics.topCropHeight,
@@ -31,7 +31,7 @@
         cropMetrics.cropHeight
       )
 
-      const croppedImageBytes = await this._encode(canvas)
+      const croppedImageBytes = await this._encode()
 
       return {
         croppedImageBytes: croppedImageBytes,
@@ -40,11 +40,11 @@
       }
     }
 
-    _getCropMetrics(image, imageData, noiseThreshold) {
-      const topCropHeight = this._getTopCropHeight(image, imageData, noiseThreshold)
-      const bottomCropHeight = this._getBottomCropHeight(image, imageData, noiseThreshold)
-      const leftCropWidth = this._getLeftCropWidth(image, imageData, noiseThreshold)
-      const rightCropWidth = this._getRightCropWidth(image, imageData, noiseThreshold)
+    _getCropMetrics(image, imageData) {
+      const topCropHeight = this._getTopCropHeight(image, imageData)
+      const bottomCropHeight = this._getBottomCropHeight(image, imageData)
+      const leftCropWidth = this._getLeftCropWidth(image, imageData)
+      const rightCropWidth = this._getRightCropWidth(image, imageData)
 
       return {
         topCropHeight: topCropHeight,
@@ -56,12 +56,12 @@
       }
     }
 
-    _isWhiteAt(x, y, image, imageData, noiseThreshold) {
+    _isWhiteAt(x, y, image, imageData) {
       let [redIndex, greenIndex, blueIndex, alphaIndex] = this._getColorIndicesForPoint(x, y, image.width)
 
-      return imageData.data[redIndex] > noiseThreshold
-        && imageData.data[blueIndex] > noiseThreshold
-        && imageData.data[greenIndex] > noiseThreshold
+      return imageData.data[redIndex] > this.noiseThreshold
+        && imageData.data[blueIndex] > this.noiseThreshold
+        && imageData.data[greenIndex] > this.noiseThreshold
     }
 
     _getColorIndicesForPoint(x, y, width) {
@@ -69,11 +69,11 @@
       return [red, red + 1, red + 2, red + 3];
     }
 
-    _getTopCropHeight(image, imageData, noiseThreshold) {
+    _getTopCropHeight(image, imageData) {
       var height = 0
       for (var y = 0; y < image.height; y++) {
         for (var x = 0; x < image.width; x++) {
-          if (!this._isWhiteAt(x, y, image, imageData, noiseThreshold)) {
+          if (!this._isWhiteAt(x, y, image, imageData)) {
             return height // TODO Handle when height == image.height
           }
         }
@@ -81,11 +81,11 @@
       }
     }
 
-    _getBottomCropHeight(image, imageData, noiseThreshold) {
+    _getBottomCropHeight(image, imageData) {
       var height = 0
       for (var y = image.height - 1; y >= 0; y--) {
         for (var x = image.width - 1; x >= 0; x--) {
-          if (!this._isWhiteAt(x, y, image, imageData, noiseThreshold)) {
+          if (!this._isWhiteAt(x, y, image, imageData)) {
             return height // TODO Handle when height == image.height
           }
         }
@@ -93,11 +93,11 @@
       }
     }
 
-    _getLeftCropWidth(image, imageData, noiseThreshold) {
+    _getLeftCropWidth(image, imageData) {
       var width = 0
       for (var x = 0; x < image.width; x++) {
         for (var y = 0; y < image.height; y++) {
-          if (!this._isWhiteAt(x, y, image, imageData, noiseThreshold)) {
+          if (!this._isWhiteAt(x, y, image, imageData)) {
             return width // TODO Handle when width == image.width
           }
         }
@@ -105,11 +105,11 @@
       }
     }
 
-    _getRightCropWidth(image, imageData, noiseThreshold) {
+    _getRightCropWidth(image, imageData) {
       var width = 0
       for (var x = image.width - 1; x >= 0; x--) {
         for (var y = image.height - 1; y >= 0 ; y--) {
-          if (!this._isWhiteAt(x, y, image, imageData, noiseThreshold)) {
+          if (!this._isWhiteAt(x, y, image, imageData)) {
             return width // TODO Handle when width == image.width
           }
         }
@@ -117,9 +117,9 @@
       }
     }
 
-    async _encode(canvas) {
+    async _encode() {
       return await new Promise((resolve, reject) => {
-        canvas.toBlob(blob => {
+        this.canvas.toBlob(blob => {
           let reader = new FileReader()
           reader.onload = () => resolve(new Uint8Array(reader.result))
           reader.onerror = () => reject(new Error('Could not read from blob'))
@@ -128,8 +128,8 @@
       })
     }
 
-    async _decode(imageBytes) {
-      let url = URL.createObjectURL(new Blob([imageBytes]))
+    async _decode() {
+      let url = URL.createObjectURL(new Blob([this.imageBytes]))
       let image = await new Promise((resolve, reject) => {
         let img = new Image()
         img.onload = () => resolve(img)
