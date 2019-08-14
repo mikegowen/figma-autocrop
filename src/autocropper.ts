@@ -65,10 +65,7 @@ class Autocropper {
 
   static isValidNode(node) {
     const imagePaintCount = node.fills.filter(paint => paint.type === 'IMAGE').length
-    if (imagePaintCount > 1) {
-    return false
-    }
-    return true
+    return imagePaintCount === 1
   }
 }
 
