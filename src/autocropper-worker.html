@@ -1,26 +1,25 @@
 <script>
   class AutocropperWorker {
-    constructor(imageBytes, noiseThreshold) {
+    constructor(image, imageBytes, noiseThreshold) {
       this.imageBytes = imageBytes // TODO Underscore properties that are private everywhere
       this.noiseThreshold = noiseThreshold
       this.canvas = document.createElement('canvas')
       this.context = this.canvas.getContext('2d') // TODO Can I immediately use this.canvas?
+      this.image = image
     }
 
-    async crop() {
-      const image = await this._decode()
+    async getCroppedCanvas() {
+      this.canvas.width = this.image.width
+      this.canvas.height = this.image.height
+      this.context.drawImage(this.image, 0, 0)
 
-      this.canvas.width = image.width
-      this.canvas.height = image.height
-      this.context.drawImage(image, 0, 0)
-
-      const imageData = this.context.getImageData(0, 0, image.width, image.height)
-      const cropMetrics = this._getCropMetrics(image, imageData)
+      const imageData = this.context.getImageData(0, 0, this.image.width, this.image.height)
+      const cropMetrics = this._getCropMetrics(imageData)
 
       this.canvas.width = cropMetrics.cropWidth
       this.canvas.height = cropMetrics.cropHeight
       this.context.drawImage(
-        image,
+        this.image,
         cropMetrics.leftCropWidth,
         cropMetrics.topCropHeight,
         cropMetrics.cropWidth,
@@ -30,50 +29,43 @@
         cropMetrics.cropWidth,
         cropMetrics.cropHeight
       )
-
-      const croppedImageBytes = await this._encode()
-
-      return {
-        croppedImageBytes: croppedImageBytes,
-        cropWidth: cropMetrics.cropWidth,
-        cropHeight: cropMetrics.cropHeight
-      }
+      return this.canvas
     }
 
-    _getCropMetrics(image, imageData) {
-      const topCropHeight = this._getTopCropHeight(image, imageData)
-      const bottomCropHeight = this._getBottomCropHeight(image, imageData)
-      const leftCropWidth = this._getLeftCropWidth(image, imageData)
-      const rightCropWidth = this._getRightCropWidth(image, imageData)
+    _getCropMetrics(imageData) {
+      const topCropHeight = this._getTopCropHeight(imageData)
+      const bottomCropHeight = this._getBottomCropHeight(imageData)
+      const leftCropWidth = this._getLeftCropWidth(imageData)
+      const rightCropWidth = this._getRightCropWidth(imageData)
 
       return {
         topCropHeight: topCropHeight,
         bottomCropHeight: bottomCropHeight,
         leftCropWidth: leftCropWidth,
         rightCropWidth: rightCropWidth,
-        cropWidth: image.width - (rightCropWidth + leftCropWidth),
-        cropHeight: image.height - (bottomCropHeight + topCropHeight)
+        cropWidth: this.image.width - (rightCropWidth + leftCropWidth),
+        cropHeight: this.image.height - (bottomCropHeight + topCropHeight)
       }
     }
 
-    _isWhiteAt(x, y, image, imageData) {
-      let [redIndex, greenIndex, blueIndex, alphaIndex] = this._getColorIndicesForPoint(x, y, image.width)
+    _isWhiteAt(x, y, imageData) {
+      let [redIndex, greenIndex, blueIndex, alphaIndex] = this._getColorIndicesForPoint(x, y)
 
       return imageData.data[redIndex] > this.noiseThreshold
         && imageData.data[blueIndex] > this.noiseThreshold
         && imageData.data[greenIndex] > this.noiseThreshold
     }
 
-    _getColorIndicesForPoint(x, y, width) {
-      let red = y * (width * 4) + x * 4;
+    _getColorIndicesForPoint(x, y) {
+      let red = y * (this.image.width * 4) + x * 4;
       return [red, red + 1, red + 2, red + 3];
     }
 
-    _getTopCropHeight(image, imageData) {
+    _getTopCropHeight(imageData) {
       var height = 0
-      for (var y = 0; y < image.height; y++) {
-        for (var x = 0; x < image.width; x++) {
-          if (!this._isWhiteAt(x, y, image, imageData)) {
+      for (var y = 0; y < this.image.height; y++) {
+        for (var x = 0; x < this.image.width; x++) {
+          if (!this._isWhiteAt(x, y, imageData)) {
             return height // TODO Handle when height == image.height
           }
         }
@@ -81,11 +73,11 @@
       }
     }
 
-    _getBottomCropHeight(image, imageData) {
+    _getBottomCropHeight(imageData) {
       var height = 0
-      for (var y = image.height - 1; y >= 0; y--) {
-        for (var x = image.width - 1; x >= 0; x--) {
-          if (!this._isWhiteAt(x, y, image, imageData)) {
+      for (var y = this.image.height - 1; y >= 0; y--) {
+        for (var x = this.image.width - 1; x >= 0; x--) {
+          if (!this._isWhiteAt(x, y, imageData)) {
             return height // TODO Handle when height == image.height
           }
         }
@@ -93,11 +85,11 @@
       }
     }
 
-    _getLeftCropWidth(image, imageData) {
+    _getLeftCropWidth(imageData) {
       var width = 0
-      for (var x = 0; x < image.width; x++) {
-        for (var y = 0; y < image.height; y++) {
-          if (!this._isWhiteAt(x, y, image, imageData)) {
+      for (var x = 0; x < this.image.width; x++) {
+        for (var y = 0; y < this.image.height; y++) {
+          if (!this._isWhiteAt(x, y, imageData)) {
             return width // TODO Handle when width == image.width
           }
         }
@@ -105,21 +97,23 @@
       }
     }
 
-    _getRightCropWidth(image, imageData) {
+    _getRightCropWidth(imageData) {
       var width = 0
-      for (var x = image.width - 1; x >= 0; x--) {
-        for (var y = image.height - 1; y >= 0 ; y--) {
-          if (!this._isWhiteAt(x, y, image, imageData)) {
+      for (var x = this.image.width - 1; x >= 0; x--) {
+        for (var y = this.image.height - 1; y >= 0 ; y--) {
+          if (!this._isWhiteAt(x, y, imageData)) {
             return width // TODO Handle when width == image.width
           }
         }
         width++
       }
     }
+  }
 
-    async _encode() {
+  class EncoderDecoder {
+    static async encodeCanvasToImageBytes(canvas) {
       return await new Promise((resolve, reject) => {
-        this.canvas.toBlob(blob => {
+        canvas.toBlob(blob => {
           let reader = new FileReader()
           reader.onload = () => resolve(new Uint8Array(reader.result))
           reader.onerror = () => reject(new Error('Could not read from blob'))
@@ -128,8 +122,8 @@
       })
     }
 
-    async _decode() {
-      let url = URL.createObjectURL(new Blob([this.imageBytes]))
+    static async decodeImageBytesToImage(imageBytes) {
+      let url = URL.createObjectURL(new Blob([imageBytes]))
       let image = await new Promise((resolve, reject) => {
         let img = new Image()
         img.onload = () => resolve(img)
@@ -144,14 +138,18 @@
     const imageBytes = event.data.pluginMessage.imageBytes
     const noiseThreshold = event.data.pluginMessage.noiseThreshold
 
-    const autocropperWorker = new AutocropperWorker(imageBytes, noiseThreshold)
-    const cropDescription = await autocropperWorker.crop()
+    const image = await EncoderDecoder.decodeImageBytesToImage(imageBytes)
+
+    const autocropperWorker = new AutocropperWorker(image, imageBytes, noiseThreshold)
+    const croppedCanvas = await autocropperWorker.getCroppedCanvas()
+
+    const croppedImageBytes = await EncoderDecoder.encodeCanvasToImageBytes(croppedCanvas)
 
     window.parent.postMessage({
       pluginMessage: {
-        croppedImageBytes: cropDescription.croppedImageBytes,
-        cropWidth: cropDescription.cropWidth,
-        cropHeight: cropDescription.cropHeight
+        croppedImageBytes: croppedImageBytes,
+        cropWidth: croppedCanvas.width,
+        cropHeight: croppedCanvas.height
       }
     }, '*')
   }
