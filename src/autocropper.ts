@@ -62,7 +62,7 @@ class Autocropper {
       figma.ui.onmessage = value => resolve(value)
     })
 
-    if (response.status === 'success') { // TODO Fix these TS warnings
+    if (response.status === 'success') {
       this._cropDescription = response.data
     } else if (response.status === 'no-remaining-image') {
       return "There was no remaining image after cropping. Aborting."
