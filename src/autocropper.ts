@@ -7,6 +7,7 @@ class Autocropper {
   _imagePaint: ImagePaint
   _imagePaintIndex: number
   _cropDescription: { croppedImageBytes: Uint8Array, cropWidth: number, cropHeight: number }
+  response: { status: string, data: {} | { croppedImageBytes: Uint8Array, cropWidth: number, cropHeight: number } }
 
   constructor(node, noiseThreshold) {
     this._node = node
@@ -39,12 +40,12 @@ class Autocropper {
     return newPaint
   }
 
-  _replaceExistingImagePaint() { // TODO Not pure
+  _replaceExistingImagePaint() {
     const newPaint = this._getNewPaint()
     this._fills.splice(this._imagePaintIndex, 1, newPaint);
   }
 
-  _cropAndPaintNode() { // TODO Not pure
+  _cropAndPaintNode() {
     this._node.fills = []
     this._node.resize(this._cropDescription.cropWidth, this._cropDescription.cropHeight)
     this._node.fills = this._fills
@@ -57,9 +58,15 @@ class Autocropper {
     figma.showUI(workerHTML, { visible: false })
     figma.ui.postMessage({ imageBytes: imageBytes, noiseThreshold: this._noiseThreshold })
 
-    this._cropDescription = await new Promise((resolve, reject) => {
+    const response = await new Promise((resolve, reject) => {
       figma.ui.onmessage = value => resolve(value)
     })
+
+    if (response.status === 'success') { // TODO Fix these TS warnings
+      this._cropDescription = response.data
+    } else if (response.status === 'no-remaining-image') {
+      return "There was no remaining image after cropping. Aborting."
+    }
 
     this._replaceExistingImagePaint()
     this._cropAndPaintNode()

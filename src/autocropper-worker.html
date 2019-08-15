@@ -73,7 +73,7 @@
       for (let y = 0; y < this._image.height; y++) {
         for (let x = 0; x < this._image.width; x++) {
           if (!this._isWhiteAt(x, y, imageData)) {
-            return height // TODO Handle when height == image.height
+            return height
           }
         }
         height++
@@ -85,7 +85,7 @@
       for (let y = this._image.height - 1; y >= 0; y--) {
         for (let x = this._image.width - 1; x >= 0; x--) {
           if (!this._isWhiteAt(x, y, imageData)) {
-            return height // TODO Handle when height == image.height
+            return height
           }
         }
         height++
@@ -97,7 +97,7 @@
       for (let x = 0; x < this._image.width; x++) {
         for (let y = 0; y < this._image.height; y++) {
           if (!this._isWhiteAt(x, y, imageData)) {
-            return width // TODO Handle when width == image.width
+            return width
           }
         }
         width++
@@ -109,7 +109,7 @@
       for (let x = this._image.width - 1; x >= 0; x--) {
         for (let y = this._image.height - 1; y >= 0 ; y--) {
           if (!this._isWhiteAt(x, y, imageData)) {
-            return width // TODO Handle when width == image.width
+            return width
           }
         }
         width++
@@ -150,14 +150,21 @@
     const autocropperWorker = new AutocropperWorker(image, imageBytes, noiseThreshold)
     const croppedCanvas = await autocropperWorker.getCroppedCanvas()
 
-    const croppedImageBytes = await EncoderDecoder.encodeCanvasToImageBytes(croppedCanvas)
+    if (croppedCanvas.width === 0 && croppedCanvas.height === 0) {
+      window.parent.postMessage({ pluginMessage: { status: 'no-remaining-image', data: {} } }, '*')
+    } else {
+      const croppedImageBytes = await EncoderDecoder.encodeCanvasToImageBytes(croppedCanvas)
 
-    window.parent.postMessage({
-      pluginMessage: {
-        croppedImageBytes: croppedImageBytes,
-        cropWidth: croppedCanvas.width,
-        cropHeight: croppedCanvas.height
-      }
-    }, '*')
+      window.parent.postMessage({
+        pluginMessage: {
+          status: 'success',
+          data: {
+            croppedImageBytes: croppedImageBytes,
+            cropWidth: croppedCanvas.width,
+            cropHeight: croppedCanvas.height
+          }
+        }
+      }, '*')
+    }
   }
 </script>
