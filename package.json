@@ -1,8 +1,8 @@
 {
-  "name": "autocrop-image",
+  "name": "autocrop",
   "version": "1.0.0",
   "description": "Figma plugin to automatically crop the extra space surrounding an image.",
-  "repository": "github:mikegowen/figma-autocrop-image",
+  "repository": "github:mikegowen/figma-autocrop",
   "main": "code.ts",
   "scripts": {
     "webpack": "webpack",
