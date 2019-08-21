@@ -12,7 +12,6 @@ class Autocropper {
     cropWidth: number,
     cropHeight: number
   }
-  response: { status: string, data: {} | { croppedImageBytes: Uint8Array, cropWidth: number, cropHeight: number } }
 
   constructor(node, noiseThreshold) {
     this._node = node
