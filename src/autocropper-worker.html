@@ -103,7 +103,7 @@
     }
   }
 
-  class EncoderDecoder {
+  class Decoder {
     static async decodeImageBytesToImage(imageBytes) {
       const url = URL.createObjectURL(new Blob([imageBytes]))
       const image = await new Promise((resolve, reject) => {
@@ -120,7 +120,7 @@
     const imageBytes = event.data.pluginMessage.imageBytes
     const noiseThreshold = event.data.pluginMessage.noiseThreshold
 
-    const image = await EncoderDecoder.decodeImageBytesToImage(imageBytes)
+    const image = await Decoder.decodeImageBytesToImage(imageBytes)
 
     const autocropperWorker = new AutocropperWorker(image, imageBytes, noiseThreshold)
     const cropDescription  = await autocropperWorker.getCropDescription()
