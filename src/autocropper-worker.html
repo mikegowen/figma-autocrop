@@ -120,7 +120,12 @@
     const cropDescription  = await autocropperWorker.getCropDescription()
     
     if (cropDescription.leftCropWidth === image.width && cropDescription.topCropHeight === image.height) {
-      window.parent.postMessage({ pluginMessage: { status: 'no-remaining-image', data: {} } }, '*')
+      window.parent.postMessage({
+        pluginMessage: {
+          status: 'no-remaining-image',
+          data: {} 
+        }
+      }, '*')
     } else {
       window.parent.postMessage({
         pluginMessage: {
