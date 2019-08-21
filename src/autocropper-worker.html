@@ -15,31 +15,13 @@
       this._context = newContext
     }
 
-    async getCroppedCanvas() {
+    getCropDescription() {
       this._canvas.width = this._image.width
       this._canvas.height = this._image.height
       this._context.drawImage(this._image, 0, 0)
 
       const imageData = this._context.getImageData(0, 0, this._image.width, this._image.height)
-      const cropMetrics = this._getCropMetrics(imageData)
 
-      this._canvas.width = cropMetrics.cropWidth
-      this._canvas.height = cropMetrics.cropHeight
-      this._context.drawImage(
-        this._image,
-        cropMetrics.leftCropWidth,
-        cropMetrics.topCropHeight,
-        cropMetrics.cropWidth,
-        cropMetrics.cropHeight,
-        0,
-        0,
-        cropMetrics.cropWidth,
-        cropMetrics.cropHeight
-      )
-      return this._canvas
-    }
-
-    _getCropMetrics(imageData) {
       const topCropHeight = this._getTopCropHeight(imageData)
       const bottomCropHeight = this._getBottomCropHeight(imageData)
       const leftCropWidth = this._getLeftCropWidth(imageData)
@@ -78,6 +60,7 @@
         }
         height++
       }
+      return height
     }
 
     _getBottomCropHeight(imageData) {
@@ -90,6 +73,7 @@
         }
         height++
       }
+      return height
     }
 
     _getLeftCropWidth(imageData) {
@@ -102,6 +86,7 @@
         }
         width++
       }
+      return width
     }
 
     _getRightCropWidth(imageData) {
@@ -114,21 +99,11 @@
         }
         width++
       }
+      return width
     }
   }
 
   class EncoderDecoder {
-    static async encodeCanvasToImageBytes(canvas) {
-      return await new Promise((resolve, reject) => {
-        canvas.toBlob(blob => {
-          const reader = new FileReader()
-          reader.onload = () => resolve(new Uint8Array(reader.result))
-          reader.onerror = () => reject(new Error('Could not read from blob'))
-          reader.readAsArrayBuffer(blob)
-        })
-      })
-    }
-
     static async decodeImageBytesToImage(imageBytes) {
       const url = URL.createObjectURL(new Blob([imageBytes]))
       const image = await new Promise((resolve, reject) => {
@@ -148,21 +123,15 @@
     const image = await EncoderDecoder.decodeImageBytesToImage(imageBytes)
 
     const autocropperWorker = new AutocropperWorker(image, imageBytes, noiseThreshold)
-    const croppedCanvas = await autocropperWorker.getCroppedCanvas()
-
-    if (croppedCanvas.width === 0 && croppedCanvas.height === 0) {
+    const cropDescription  = await autocropperWorker.getCropDescription()
+    
+    if (cropDescription.leftCropWidth === image.width && cropDescription.topCropHeight === image.height) {
       window.parent.postMessage({ pluginMessage: { status: 'no-remaining-image', data: {} } }, '*')
     } else {
-      const croppedImageBytes = await EncoderDecoder.encodeCanvasToImageBytes(croppedCanvas)
-
       window.parent.postMessage({
         pluginMessage: {
           status: 'success',
-          data: {
-            croppedImageBytes: croppedImageBytes,
-            cropWidth: croppedCanvas.width,
-            cropHeight: croppedCanvas.height
-          }
+          data: cropDescription
         }
       }, '*')
     }

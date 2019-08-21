@@ -35,8 +35,13 @@ class Autocropper {
 
   _getNewPaint() {
     const newPaint = JSON.parse(JSON.stringify(this._imagePaint))
-    const newImage = figma.createImage(this._cropDescription.croppedImageBytes)
-    newPaint.imageHash = newImage.hash
+
+    newPaint.imageHash = this._image.hash
+    newPaint.imageTransform = [
+      [0.7670454382896423, 0, 0.10227273404598236],
+      [0, 0.6641791462898254, 0.20522387325763702]
+    ]
+
     return newPaint
   }
 
@@ -65,7 +70,7 @@ class Autocropper {
     if (response.status === 'success') {
       this._cropDescription = response.data
     } else if (response.status === 'no-remaining-image') {
-      return "There was no remaining image after cropping. Aborting."
+      return "There would be no remaining image after cropping."
     }
 
     this._replaceExistingImagePaint()
