@@ -4,17 +4,20 @@ class Autocropper {
   _node: RectangleNode
   _noiseThreshold: number
   _fills: Array<Paint>
-  _imagePaint: ImagePaint
-  _imagePaintIndex: number
-  _cropDescription: { croppedImageBytes: Uint8Array, cropWidth: number, cropHeight: number }
+  _cropDescription: {
+    bottomCropHeight: number,
+    leftCropWidth: number,
+    rightCropWidth: number,
+    topCropHeight: number,
+    cropWidth: number,
+    cropHeight: number
+  }
   response: { status: string, data: {} | { croppedImageBytes: Uint8Array, cropWidth: number, cropHeight: number } }
 
   constructor(node, noiseThreshold) {
     this._node = node
     this._noiseThreshold = noiseThreshold
     this._fills = [...node.fills]
-    this._imagePaint = this._getImagePaint() as ImagePaint // TODO Not sure why I need to do this
-    this._imagePaintIndex = this._getImagePaintIndex()
   }
 
   get _image() {
@@ -25,18 +28,16 @@ class Autocropper {
     return autocropperWorker
   }
 
-  _getImagePaint() {
-    return this._fills.find(paint => paint.type === 'IMAGE')
+  get _imagePaint() {
+    return this._fills.find(paint => paint.type === 'IMAGE') as ImagePaint
   }
 
-  _getImagePaintIndex() {
+  get _imagePaintIndex() {
     return this._fills.findIndex(paint => paint === this._imagePaint)
   }
 
   _getNewPaint() {
     const newPaint = JSON.parse(JSON.stringify(this._imagePaint))
-
-    newPaint.imageHash = this._image.hash
     newPaint.imageTransform = [
       [0.7670454382896423, 0, 0.10227273404598236],
       [0, 0.6641791462898254, 0.20522387325763702]
