@@ -5,9 +5,7 @@ class Autocropper {
   _noiseThreshold: number
   _fills: Array<Paint>
   _cropDescription: {
-    bottomCropHeight: number,
     leftCropWidth: number,
-    rightCropWidth: number,
     topCropHeight: number,
     cropWidth: number,
     cropHeight: number
@@ -37,11 +35,19 @@ class Autocropper {
 
   _getNewPaint() {
     const newPaint = JSON.parse(JSON.stringify(this._imagePaint))
+    newPaint.scaleMode = 'CROP'
     newPaint.imageTransform = [
-      [0.7670454382896423, 0, 0.10227273404598236],
-      [0, 0.6641791462898254, 0.20522387325763702]
+      [
+        this._cropDescription.cropWidth / this._node.width,
+        0,
+        this._cropDescription.leftCropWidth / this._node.width
+      ],
+      [
+        0,
+        this._cropDescription.cropHeight / this._node.height,
+        this._cropDescription.topCropHeight / this._node.height,
+      ]
     ]
-
     return newPaint
   }
 
