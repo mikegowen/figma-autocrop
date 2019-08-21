@@ -9,6 +9,8 @@ class Autocropper {
     topCropHeight: number,
     cropWidth: number,
     cropHeight: number
+    imageWidth: number,
+    imageHeight: number
   }
 
   constructor(node, noiseThreshold) {
@@ -38,14 +40,14 @@ class Autocropper {
     newPaint.scaleMode = 'CROP'
     newPaint.imageTransform = [
       [
-        this._cropDescription.cropWidth / this._node.width,
+        this._cropDescription.cropWidth / this._cropDescription.imageWidth,
         0,
-        this._cropDescription.leftCropWidth / this._node.width
+        this._cropDescription.leftCropWidth / this._cropDescription.imageWidth
       ],
       [
         0,
-        this._cropDescription.cropHeight / this._node.height,
-        this._cropDescription.topCropHeight / this._node.height,
+        this._cropDescription.cropHeight / this._cropDescription.imageHeight,
+        this._cropDescription.topCropHeight / this._cropDescription.imageHeight,
       ]
     ]
     return newPaint
