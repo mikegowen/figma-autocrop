@@ -3,29 +3,23 @@
     constructor(image, imageBytes, noiseThreshold) {
       this._imageBytes = imageBytes
       this._noiseThreshold = noiseThreshold
-      this._canvas = document.createElement('canvas')
       this._image = image
     }
 
-    get _context() {
-      return this._canvas.getContext('2d')
-    }
-
-    set _context(newContext) {
-      this._context = newContext
-    }
-
     getCropDescription() {
-      this._canvas.width = this._image.width
-      this._canvas.height = this._image.height
-      this._context.drawImage(this._image, 0, 0)
+      const canvas = document.createElement('canvas')
+      const context = canvas.getContext('2d')
+      
+      canvas.width = this._image.width // TODO May not need these
+      canvas.height = this._image.height
+      context.drawImage(this._image, 0, 0)
 
-      const imageData = this._context.getImageData(0, 0, this._image.width, this._image.height)
+      this._imageData = context.getImageData(0, 0, this._image.width, this._image.height)
 
-      const topCropHeight = this._getTopCropHeight(imageData)
-      const bottomCropHeight = this._getBottomCropHeight(imageData)
-      const leftCropWidth = this._getLeftCropWidth(imageData)
-      const rightCropWidth = this._getRightCropWidth(imageData)
+      const topCropHeight = this._getTopCropHeight()
+      const bottomCropHeight = this._getBottomCropHeight()
+      const leftCropWidth = this._getLeftCropWidth()
+      const rightCropWidth = this._getRightCropWidth()
 
       return {
         topCropHeight: topCropHeight,
@@ -37,12 +31,12 @@
       }
     }
 
-    _isWhiteAt(x, y, imageData) {
+    _isWhiteAt(x, y) {
       const [redIndex, greenIndex, blueIndex, alphaIndex] = this._getColorIndicesForPoint(x, y)
 
-      return imageData.data[redIndex] > this._noiseThreshold
-        && imageData.data[blueIndex] > this._noiseThreshold
-        && imageData.data[greenIndex] > this._noiseThreshold
+      return this._imageData.data[redIndex] > this._noiseThreshold
+        && this._imageData.data[blueIndex] > this._noiseThreshold
+        && this._imageData.data[greenIndex] > this._noiseThreshold
     }
 
     _getColorIndicesForPoint(x, y) {
@@ -50,11 +44,11 @@
       return [red, red + 1, red + 2, red + 3];
     }
 
-    _getTopCropHeight(imageData) {
+    _getTopCropHeight() {
       let height = 0
       for (let y = 0; y < this._image.height; y++) {
         for (let x = 0; x < this._image.width; x++) {
-          if (!this._isWhiteAt(x, y, imageData)) {
+          if (!this._isWhiteAt(x, y)) {
             return height
           }
         }
@@ -63,11 +57,11 @@
       return height
     }
 
-    _getBottomCropHeight(imageData) {
+    _getBottomCropHeight() {
       let height = 0
       for (let y = this._image.height - 1; y >= 0; y--) {
         for (let x = this._image.width - 1; x >= 0; x--) {
-          if (!this._isWhiteAt(x, y, imageData)) {
+          if (!this._isWhiteAt(x, y)) {
             return height
           }
         }
@@ -76,11 +70,11 @@
       return height
     }
 
-    _getLeftCropWidth(imageData) {
+    _getLeftCropWidth() {
       let width = 0
       for (let x = 0; x < this._image.width; x++) {
         for (let y = 0; y < this._image.height; y++) {
-          if (!this._isWhiteAt(x, y, imageData)) {
+          if (!this._isWhiteAt(x, y)) {
             return width
           }
         }
@@ -89,11 +83,11 @@
       return width
     }
 
-    _getRightCropWidth(imageData) {
+    _getRightCropWidth() {
       let width = 0
       for (let x = this._image.width - 1; x >= 0; x--) {
         for (let y = this._image.height - 1; y >= 0 ; y--) {
-          if (!this._isWhiteAt(x, y, imageData)) {
+          if (!this._isWhiteAt(x, y)) {
             return width
           }
         }
