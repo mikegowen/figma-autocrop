@@ -126,6 +126,13 @@
           data: {} 
         }
       }, '*')
+    } else if (cropDescription.leftCropWidth === 0 && cropDescription.topCropHeight === 0) {
+      window.parent.postMessage({
+        pluginMessage: {
+          status: 'nothing-to-crop',
+          data: {} 
+        }
+      }, '*')
     } else {
       window.parent.postMessage({
         pluginMessage: {

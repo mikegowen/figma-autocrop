@@ -63,14 +63,24 @@ class Autocropper {
       figma.ui.onmessage = value => resolve(value)
     })
 
-    if (response.status === 'success') {
-      this._cropDescription = response.data
-    } else if (response.status === 'no-remaining-image') {
-      return "There would be no remaining image after cropping."
+    let closeMessage = ''
+
+    switch (response.status) {
+      case 'success':
+        this._cropDescription = response.data
+        this._replaceExistingImagePaint()
+        this._cropAndPaintNode()
+        closeMessage = ''
+        break
+      case 'no-remaining-image':
+          closeMessage = 'There would be no remaining image after cropping.'
+        break 
+      case 'nothing-to-crop':
+          closeMessage = 'There isn\'t anything to crop.'
+        break
     }
 
-    this._replaceExistingImagePaint()
-    this._cropAndPaintNode()
+    return closeMessage
   }
 
   static isValidNode(node) {
