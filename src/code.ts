@@ -1,5 +1,3 @@
-// TODO Define all types and fix warnings in all ts files
-
 import Autocropper from './autocropper'
 
 const selection = figma.currentPage.selection

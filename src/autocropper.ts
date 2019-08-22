@@ -1,18 +1,6 @@
 import autocropperWorker from './autocropper-worker.html'
 
 class Autocropper {
-  _node: RectangleNode
-  _noiseThreshold: number
-  _fills: Array<Paint>
-  _cropDescription: {
-    leftCropWidth: number,
-    topCropHeight: number,
-    cropWidth: number,
-    cropHeight: number
-    imageWidth: number,
-    imageHeight: number
-  }
-
   constructor(node, noiseThreshold) {
     this._node = node
     this._noiseThreshold = noiseThreshold
