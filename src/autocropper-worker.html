@@ -1,8 +1,9 @@
 <script>
   class AutocropperWorker {
-    constructor(image, imageBytes, noiseThreshold) {
+    constructor(image, imageBytes, backgroundMargin, colorPercentage) {
       this._imageBytes = imageBytes
-      this._noiseThreshold = noiseThreshold
+      this._backgroundMargin = backgroundMargin
+      this._colorPercentage = colorPercentage
       this._image = image
     }
 
@@ -15,6 +16,11 @@
       context.drawImage(this._image, 0, 0)
 
       this._imageData = context.getImageData(0, 0, this._image.width, this._image.height)
+      this._backgroundColor = this._getBackgroundColor()
+
+      if (this._backgroundColor === null) {
+        return null
+      }
 
       const topCropHeight = this._getTopCropHeight()
       const bottomCropHeight = this._getBottomCropHeight()
@@ -31,15 +37,97 @@
       }
     }
 
-    _isWhiteAt(x, y) {
-      const [redIndex, greenIndex, blueIndex, alphaIndex] = this._getColorIndicesForPoint(x, y)
+    _getBackgroundColor() {
+      let colors = []
 
-      return this._imageData.data[redIndex] > this._noiseThreshold
-        && this._imageData.data[blueIndex] > this._noiseThreshold
-        && this._imageData.data[greenIndex] > this._noiseThreshold
+      for (let x = 0; x < this._image.width; x++) {
+        let [red, green, blue, alpha] = this._getRGBAIndiciesForPoint(x, 0)
+        colors.push([
+          this._imageData.data[red],
+          this._imageData.data[green],
+          this._imageData.data[blue]
+          // TODO Add support for transparent images
+        ])
+      }
+
+      for (let x = 0; x < this._image.width; x++) {
+        let [red, green, blue, alpha] = this._getRGBAIndiciesForPoint(x, this._image.height - 1)
+        colors.push([
+          this._imageData.data[red],
+          this._imageData.data[green],
+          this._imageData.data[blue]
+        ])
+      }
+
+      for (let y = 1; y < this._image.height - 1; y++) {
+        let [red, green, blue, alpha] = this._getRGBAIndiciesForPoint(0, y)
+        colors.push([
+          this._imageData.data[red],
+          this._imageData.data[green],
+          this._imageData.data[blue]
+        ])
+      }
+
+      for (let y = 1; y < this._image.height - 1; y++) {
+        let [red, green, blue, alpha] = this._getRGBAIndiciesForPoint(this._image.width - 1, y)
+        colors.push([
+          this._imageData.data[red],
+          this._imageData.data[green],
+          this._imageData.data[blue]
+        ])
+      }
+
+      const colorCounts = this._getColorCounts(colors)
+
+      if (colorCounts[0].percentage > this._colorPercentage) {
+        return colorCounts[0].color
+      } else {
+        return null
+      }
     }
 
-    _getColorIndicesForPoint(x, y) {
+    _getColorCounts(colors) {
+      const colorCounts = colors.reduce((colorCounts, currentColor) => {
+        const foundColor = colorCounts.find(colorCount => {
+          return JSON.stringify(colorCount.color) === JSON.stringify(currentColor)
+        })
+        if (!foundColor) {
+          colorCounts.push({ color: currentColor, count: 1 })
+        }
+        else {
+          foundColor.count += 1
+        }
+        return colorCounts
+      }, [])
+
+      colorCounts.sort((a, b) => {
+        return b.count - a.count
+      })
+
+      const totalColors = (this._image.width * 2) + ((this._image.height - 2) * 2)
+
+      colorCounts.map(colorCount => {
+        colorCount.percentage = (colorCount.count / totalColors) * 100
+        return colorCount
+      })
+
+      return colorCounts
+    }
+
+    _isBackgroudAtPoint(x, y) {
+      const [red, green, blue, alpha] = this._getRGBAIndiciesForPoint(x, y)
+
+      return this._isWithinMargin(this._imageData.data[red], this._backgroundColor[0], this._backgroundMargin)
+        && this._isWithinMargin(this._imageData.data[green], this._backgroundColor[1], this._backgroundMargin)
+        && this._isWithinMargin(this._imageData.data[blue], this._backgroundColor[2], this._backgroundMargin)
+    }
+
+    _isWithinMargin(colorValue, testColorValue, margin) {
+      return colorValue <= Math.min(testColorValue + margin, 255)
+        && colorValue >= Math.max(testColorValue - margin, 0)
+    }
+
+    _getRGBAIndiciesForPoint(x, y) {
       const red = y * (this._image.width * 4) + x * 4;
       return [red, red + 1, red + 2, red + 3];
     }
@@ -48,7 +136,7 @@
       let height = 0
       for (let y = 0; y < this._image.height; y++) {
         for (let x = 0; x < this._image.width; x++) {
-          if (!this._isWhiteAt(x, y)) {
+          if (!this._isBackgroudAtPoint(x, y)) {
             return height
           }
         }
@@ -61,7 +149,7 @@
       let height = 0
       for (let y = this._image.height - 1; y >= 0; y--) {
         for (let x = this._image.width - 1; x >= 0; x--) {
-          if (!this._isWhiteAt(x, y)) {
+          if (!this._isBackgroudAtPoint(x, y)) {
             return height
           }
         }
@@ -74,7 +162,7 @@
       let width = 0
       for (let x = 0; x < this._image.width; x++) {
         for (let y = 0; y < this._image.height; y++) {
-          if (!this._isWhiteAt(x, y)) {
+          if (!this._isBackgroudAtPoint(x, y)) {
             return width
           }
         }
@@ -87,7 +175,7 @@
       let width = 0
       for (let x = this._image.width - 1; x >= 0; x--) {
         for (let y = this._image.height - 1; y >= 0 ; y--) {
-          if (!this._isWhiteAt(x, y)) {
+          if (!this._isBackgroudAtPoint(x, y)) {
             return width
           }
         }
@@ -113,23 +201,24 @@
   window.onmessage = async (event) => {
     const imageBytes = event.data.pluginMessage.imageBytes
     const noiseThreshold = event.data.pluginMessage.noiseThreshold
+    const colorPercentage = event.data.pluginMessage.colorPercentage
 
     const image = await Decoder.decodeImageBytesToImage(imageBytes)
 
-    const autocropperWorker = new AutocropperWorker(image, imageBytes, noiseThreshold)
+    const autocropperWorker = new AutocropperWorker(image, imageBytes, noiseThreshold, colorPercentage)
     const cropDescription  = await autocropperWorker.getCropDescription()
     
-    if (cropDescription.leftCropWidth === image.width && cropDescription.topCropHeight === image.height) {
-      window.parent.postMessage({
-        pluginMessage: {
-          status: 'no-remaining-image',
-          data: {} 
-        }
-      }, '*')
-    } else if (cropDescription.leftCropWidth === 0 && cropDescription.topCropHeight === 0) {
+    if (cropDescription === null) {
       window.parent.postMessage({
         pluginMessage: {
           status: 'nothing-to-crop',
+          data: {} 
+        }
+      }, '*')
+    } else if (cropDescription.leftCropWidth === image.width && cropDescription.topCropHeight === image.height) {
+      window.parent.postMessage({
+        pluginMessage: {
+          status: 'no-remaining-image',
           data: {} 
         }
       }, '*')

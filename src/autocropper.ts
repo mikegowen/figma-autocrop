@@ -1,9 +1,10 @@
 import autocropperWorker from './autocropper-worker.html'
 
 class Autocropper {
-  constructor(node, noiseThreshold) {
+  constructor(node, noiseThreshold, colorPercentage) {
     this._node = node
     this._noiseThreshold = noiseThreshold
+    this._colorPercentage = colorPercentage
     this._fills = [...node.fills]
   }
 
@@ -57,7 +58,13 @@ class Autocropper {
     const imageBytes = await this._image.getBytesAsync()
 
     figma.showUI(workerHTML, { visible: false })
-    figma.ui.postMessage({ imageBytes: imageBytes, noiseThreshold: this._noiseThreshold })
+    figma.ui.postMessage(
+      {
+        imageBytes: imageBytes,
+        noiseThreshold: this._noiseThreshold,
+        colorPercentage: this._colorPercentage
+      }
+    )
 
     const response = await new Promise((resolve, reject) => {
       figma.ui.onmessage = value => resolve(value)
