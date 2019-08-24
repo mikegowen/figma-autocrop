@@ -45,8 +45,8 @@
         colors.push([
           this._imageData.data[red],
           this._imageData.data[green],
-          this._imageData.data[blue]
-          // TODO Add support for transparent images
+          this._imageData.data[blue],
+          this._imageData.data[alpha]
         ])
       }
 
@@ -55,7 +55,8 @@
         colors.push([
           this._imageData.data[red],
           this._imageData.data[green],
-          this._imageData.data[blue]
+          this._imageData.data[blue],
+          this._imageData.data[alpha]
         ])
       }
 
@@ -64,7 +65,8 @@
         colors.push([
           this._imageData.data[red],
           this._imageData.data[green],
-          this._imageData.data[blue]
+          this._imageData.data[blue],
+          this._imageData.data[alpha]
         ])
       }
 
@@ -73,7 +75,8 @@
         colors.push([
           this._imageData.data[red],
           this._imageData.data[green],
-          this._imageData.data[blue]
+          this._imageData.data[blue],
+          this._imageData.data[alpha]
         ])
       }
 
@@ -120,6 +123,7 @@
       return this._isWithinMargin(this._imageData.data[red], this._backgroundColor[0], this._backgroundMargin)
         && this._isWithinMargin(this._imageData.data[green], this._backgroundColor[1], this._backgroundMargin)
         && this._isWithinMargin(this._imageData.data[blue], this._backgroundColor[2], this._backgroundMargin)
+        && this._isWithinMargin(this._imageData.data[alpha], this._backgroundColor[3], this._backgroundMargin)
     }
 
     _isWithinMargin(colorValue, testColorValue, margin) {
