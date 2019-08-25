@@ -48,8 +48,9 @@ class Autocropper {
   }
 
   _cropAndPaintNode() {
+    const scaleFactor = this._cropDescription.imageHeight / this._node.height
     this._node.fills = []
-    this._node.resize(this._cropDescription.cropWidth, this._cropDescription.cropHeight)
+    this._node.resize(this._cropDescription.cropWidth / scaleFactor, this._cropDescription.cropHeight / scaleFactor)
     this._node.fills = this._fills
   }
 
@@ -90,7 +91,7 @@ class Autocropper {
     return closeMessage
   }
 
-  static isValidNode(node) {
+  static isValidNode(node) { // TODO Support non-rectangle nodes?
     const imagePaintCount = node.fills.filter(paint => paint.type === 'IMAGE').length
     return imagePaintCount === 1
   }
