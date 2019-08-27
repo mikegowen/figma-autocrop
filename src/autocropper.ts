@@ -8,7 +8,7 @@ class Autocropper {
     this._fills = [...node.fills]
   }
 
-  get _image() { // TODO Make sure I name all the image stuff accurately
+  get _image() {
     return figma.getImageByHash(this._imagePaint.imageHash)
   }
 
