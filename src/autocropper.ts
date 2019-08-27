@@ -80,7 +80,7 @@ class Autocropper {
     return response.status
   }
 
-  static isValidNode(node) { // TODO Support non-rectangle nodes?
+  static isValidNode(node) {
     const imagePaintCount = node.fills.filter(paint => paint.type === 'IMAGE').length
     return imagePaintCount === 1
   }
