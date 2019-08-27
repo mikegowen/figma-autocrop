@@ -47,7 +47,7 @@ class Autocropper {
     this._fills.splice(this._imagePaintIndex, 1, newPaint);
   }
 
-  _cropAndPaintNode() {
+  _cropAndPaintNode() { // TODO Don't resize if nothing cropped
     const scaleFactor = this._cropDescription.imageHeight / this._node.height
     this._node.fills = []
     this._node.resize(this._cropDescription.cropWidth / scaleFactor, this._cropDescription.cropHeight / scaleFactor)
@@ -71,24 +71,13 @@ class Autocropper {
       figma.ui.onmessage = value => resolve(value)
     })
 
-    let closeMessage = ''
-
-    switch (response.status) {
-      case 'success':
-        this._cropDescription = response.data
-        this._replaceExistingImagePaint()
-        this._cropAndPaintNode()
-        closeMessage = ''
-        break
-      case 'no-remaining-image':
-          closeMessage = 'There would be no remaining image after cropping.'
-        break 
-      case 'nothing-to-crop':
-          closeMessage = 'There isn\'t anything to crop.'
-        break
+    if (response.status === 'success') {
+      this._cropDescription = response.data
+      this._replaceExistingImagePaint()
+      this._cropAndPaintNode()
     }
 
-    return closeMessage
+    return response.status
   }
 
   static isValidNode(node) { // TODO Support non-rectangle nodes?
