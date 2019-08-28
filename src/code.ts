@@ -26,6 +26,7 @@ cropNodes(figma.currentPage.selection).then(status => {
   let closeMessage = ''
 
   switch (status) { // TODO Can all of this be done with Error objects?
+    // TODO Pass node name to help user find issue
     case 'multiple-image-fill':
       closeMessage = 'Please only select shapes with a single image fill.'
       break
