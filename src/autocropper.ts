@@ -47,10 +47,9 @@ class Autocropper {
     this._fills.splice(this._imagePaintIndex, 1, newPaint);
   }
 
-  _cropAndPaintNode() { // TODO Don't resize if nothing cropped
-    const scaleFactor = this._cropDescription.imageHeight / this._node.height
+  _cropAndPaintNode() {
     this._node.fills = []
-    this._node.resize(this._cropDescription.cropWidth / scaleFactor, this._cropDescription.cropHeight / scaleFactor)
+    this._node.resize(this._cropDescription.cropWidth, this._cropDescription.cropHeight)
     this._node.fills = this._fills
   }
 
