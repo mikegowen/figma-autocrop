@@ -25,8 +25,9 @@ class Autocropper {
   }
 
   _getNewPaint() {
-    const newPaint = JSON.parse(JSON.stringify(this._imagePaint))
     this._originalImagePaint = JSON.parse(JSON.stringify(this._imagePaint)) // TODO Move this out of here
+    const newPaint = JSON.parse(JSON.stringify(this._imagePaint))
+
     newPaint.scaleMode = 'CROP'
     newPaint.imageTransform = [
       [
