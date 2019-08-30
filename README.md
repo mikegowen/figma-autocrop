@@ -3,10 +3,6 @@ Figma plugin: Autocrop
 
 Figma plugin to automatically crop the extra space surrounding an image.
 
-## Usage
-
-Select a single image.
-
 ## License
 
 Copyright (c) 2019 Mike Gowen
