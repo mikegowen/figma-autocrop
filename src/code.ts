@@ -40,8 +40,12 @@ cropNodes(figma.currentPage.selection).then(results => {
     }
   })
 
-  figma.showUI(errorsHTML, { visible: true, width: 420, height: 120 })
-  figma.ui.postMessage({ errorMessagesHTML: errorMessagesHTML })
+  if (errorMessagesHTML.length > 0) {
+    figma.showUI(errorsHTML, { visible: true, width: 420, height: 120 })
+    figma.ui.postMessage({ errorMessagesHTML: errorMessagesHTML })
 
-  figma.ui.onmessage = () => figma.closePlugin()
+    figma.ui.onmessage = () => figma.closePlugin()
+  } else {
+    figma.closePlugin()
+  }
 }
