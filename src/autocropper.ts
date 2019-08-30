@@ -1,4 +1,4 @@
-import autocropperWorker from './autocropper-worker.html'
+import autocropperWorkerHTML from './autocropper-worker.html'
 
 class Autocropper {
   constructor(node, noiseThreshold, colorPercentage) {
@@ -13,7 +13,7 @@ class Autocropper {
   }
 
   _getWorkerHTML() {
-    return autocropperWorker
+    return autocropperWorkerHTML
   }
 
   get _imagePaint() {
@@ -65,10 +65,10 @@ class Autocropper {
   }
 
   async crop() {
-    const workerHTML = await this._getWorkerHTML()
+    const autocropperWorkerHTML = await this._getWorkerHTML()
     const imageBytes = await this._image.getBytesAsync()
 
-    figma.showUI(workerHTML, { visible: false })
+    figma.showUI(autocropperWorkerHTML, { visible: false })
     figma.ui.postMessage(
       {
         imageBytes: imageBytes,
@@ -87,7 +87,7 @@ class Autocropper {
       this._cropAndPaintNode()
     }
 
-    return response.status
+    return response
   }
 
   static isValidNode(node) {

@@ -1,0 +1,88 @@
+<style type='text/css'>
+  /* Styles modified from Thomas Lowry's Figma UI CSS – https://github.com/thomas-lowry/figma-plugin-ds */
+  
+  * {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box
+  }
+  /* Type */
+  
+  @font-face {
+    font-family: Inter;
+    font-style: normal;
+    font-weight: 400;
+    src: url(https://rsms.me/inter/font-files/Inter-Regular.woff2?v=3.7) format("woff2"), url(https://rsms.me/inter/font-files/Inter-Regular.woff?v=3.7) format("woff")
+  }
+  
+  @font-face {
+    font-family: Inter;
+    font-style: normal;
+    font-weight: 600;
+    src: url(https://rsms.me/inter/font-files/Inter-SemiBold.woff2?v=3.7) format("woff2"), url(https://rsms.me/inter/font-files/Inter-SemiBold.woff2?v=3.7) format("woff")
+  }
+  
+  .type--pos-small-normal {
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    font-size: 11px;
+    line-height: 16px;
+    letter-spacing: 0.005em;
+  }
+  
+  .type--pos-small-bold {
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    line-height: 16px;
+    letter-spacing: 0.005em;
+  }
+  /* Section */
+  
+  .section {
+    padding-left: 8px;
+    padding-right: 4px;
+  }
+  
+  .section-title {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    height: 32px;
+    padding: 8px 4px 8px 0;
+    color: rgba(0, 0, 0, 0.8);
+    background-color: #ffffff;
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    line-height: 16px;
+    letter-spacing: 0.005em;
+  }
+  
+  #errors {
+    padding: 0;
+    margin: 0 0 16px 16px;
+  }
+  
+  #error-count {
+    display: inline-block;
+    margin-left: 3px;
+    margin-right: 3px;
+  }
+</style>
+
+<div class='section'>
+  <div class='section-title'>There are issues with <span id='error-count'>0</span> selected layers</div>
+  <ul id='errors'></ul>
+</div>
+
+<script>
+  window.onmessage = async(event) => {
+    const errorMessagesHTML = event.data.pluginMessage.errorMessagesHTML
+
+    document.querySelector('#errors').innerHTML = errorMessagesHTML.join('')
+    document.querySelector('#error-count').textContent = errorMessagesHTML.length
+  }
+</script>

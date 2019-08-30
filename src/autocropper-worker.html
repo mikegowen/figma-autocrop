@@ -10,7 +10,7 @@
     getCropDescription() {
       const canvas = document.createElement('canvas')
       const context = canvas.getContext('2d')
-      
+
       canvas.width = this._image.width
       canvas.height = this._image.height
       context.drawImage(this._image, 0, 0)
@@ -26,7 +26,6 @@
       const bottomCropHeight = this._getBottomCropHeight()
       const leftCropWidth = this._getLeftCropWidth()
       const rightCropWidth = this._getRightCropWidth()
-
       return {
         topCropHeight: topCropHeight,
         leftCropWidth: leftCropWidth,
@@ -95,9 +94,11 @@
           return JSON.stringify(colorCount.color) === JSON.stringify(currentColor)
         })
         if (!foundColor) {
-          colorCounts.push({ color: currentColor, count: 1 })
-        }
-        else {
+          colorCounts.push({
+            color: currentColor,
+            count: 1
+          })
+        } else {
           foundColor.count += 1
         }
         return colorCounts
@@ -120,15 +121,15 @@
     _isBackgroudAtPoint(x, y) {
       const [red, green, blue, alpha] = this._getRGBAIndiciesForPoint(x, y)
 
-      return this._isWithinMargin(this._imageData.data[red], this._backgroundColor[0], this._backgroundMargin)
-        && this._isWithinMargin(this._imageData.data[green], this._backgroundColor[1], this._backgroundMargin)
-        && this._isWithinMargin(this._imageData.data[blue], this._backgroundColor[2], this._backgroundMargin)
-        && this._isWithinMargin(this._imageData.data[alpha], this._backgroundColor[3], this._backgroundMargin)
+      return this._isWithinMargin(this._imageData.data[red], this._backgroundColor[0], this._backgroundMargin) &&
+        this._isWithinMargin(this._imageData.data[green], this._backgroundColor[1], this._backgroundMargin) &&
+        this._isWithinMargin(this._imageData.data[blue], this._backgroundColor[2], this._backgroundMargin) &&
+        this._isWithinMargin(this._imageData.data[alpha], this._backgroundColor[3], this._backgroundMargin)
     }
 
     _isWithinMargin(colorValue, testColorValue, margin) {
-      return colorValue <= Math.min(testColorValue + margin, 255)
-        && colorValue >= Math.max(testColorValue - margin, 0)
+      return colorValue <= Math.min(testColorValue + margin, 255) &&
+        colorValue >= Math.max(testColorValue - margin, 0)
     }
 
     _getRGBAIndiciesForPoint(x, y) {
@@ -178,7 +179,7 @@
     _getRightCropWidth() {
       let width = 0
       for (let x = this._image.width - 1; x >= 0; x--) {
-        for (let y = this._image.height - 1; y >= 0 ; y--) {
+        for (let y = this._image.height - 1; y >= 0; y--) {
           if (!this._isBackgroudAtPoint(x, y)) {
             return width
           }
@@ -202,7 +203,7 @@
     }
   }
 
-  window.onmessage = async (event) => {
+  window.onmessage = async(event) => {
     const imageBytes = event.data.pluginMessage.imageBytes
     const noiseThreshold = event.data.pluginMessage.noiseThreshold
     const colorPercentage = event.data.pluginMessage.colorPercentage
@@ -210,20 +211,20 @@
     const image = await Decoder.decodeImageBytesToImage(imageBytes)
 
     const autocropperWorker = new AutocropperWorker(image, imageBytes, noiseThreshold, colorPercentage)
-    const cropDescription  = await autocropperWorker.getCropDescription()
-    
+    const cropDescription = await autocropperWorker.getCropDescription()
+
     if (cropDescription === null) {
       window.parent.postMessage({
         pluginMessage: {
           status: 'nothing-to-crop',
-          data: {} 
+          data: {}
         }
       }, '*')
     } else if (cropDescription.leftCropWidth === image.width && cropDescription.topCropHeight === image.height) {
       window.parent.postMessage({
         pluginMessage: {
           status: 'no-remaining-image',
-          data: {} 
+          data: {}
         }
       }, '*')
     } else {
