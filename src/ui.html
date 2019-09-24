@@ -1,5 +1,5 @@
 <script>
-  window.onmessage = async (event) => {
+  window.onmessage = async(event) => {
     const noiseThreshold = event.data.pluginMessage.noiseThreshold
     const imageBytes = event.data.pluginMessage.imageBytes
 
@@ -7,7 +7,7 @@
     const context = canvas.getContext('2d')
 
     const image = await decode(canvas, context, imageBytes)
-  
+
     canvas.width = image.width
     canvas.height = image.height
     context.drawImage(image, 0, 0)
@@ -60,9 +60,9 @@
   function isWhiteAt(x, y, image, imageData, noiseThreshold) {
     let [redIndex, greenIndex, blueIndex, alphaIndex] = getColorIndicesForPoint(x, y, image.width)
 
-    return imageData.data[redIndex] > noiseThreshold
-      && imageData.data[blueIndex] > noiseThreshold
-      && imageData.data[greenIndex] > noiseThreshold
+    return imageData.data[redIndex] > noiseThreshold &&
+      imageData.data[blueIndex] > noiseThreshold &&
+      imageData.data[greenIndex] > noiseThreshold
   }
 
   function getColorIndicesForPoint(x, y, width) {
@@ -75,7 +75,7 @@
     for (var y = 0; y < image.height; y++) {
       for (var x = 0; x < image.width; x++) {
         if (!isWhiteAt(x, y, image, imageData, noiseThreshold)) {
-          return height // TODO Handle when height == image.height
+          return height
         }
       }
       height++
@@ -87,7 +87,7 @@
     for (var y = image.height - 1; y >= 0; y--) {
       for (var x = image.width - 1; x >= 0; x--) {
         if (!isWhiteAt(x, y, image, imageData, noiseThreshold)) {
-          return height // TODO Handle when height == image.height
+          return height
         }
       }
       height++
@@ -99,7 +99,7 @@
     for (var x = 0; x < image.width; x++) {
       for (var y = 0; y < image.height; y++) {
         if (!isWhiteAt(x, y, image, imageData, noiseThreshold)) {
-          return width // TODO Handle when width == image.width
+          return width
         }
       }
       width++
@@ -109,9 +109,9 @@
   function getRightCropWidth(image, imageData, noiseThreshold) {
     var width = 0
     for (var x = image.width - 1; x >= 0; x--) {
-      for (var y = image.height - 1; y >= 0 ; y--) {
+      for (var y = image.height - 1; y >= 0; y--) {
         if (!isWhiteAt(x, y, image, imageData, noiseThreshold)) {
-          return width // TODO Handle when width == image.width
+          return width
         }
       }
       width++
@@ -119,7 +119,6 @@
   }
 
   async function encode(canvas, context, imageData) {
-    // context.putImageData(imageData, 0, 0)
     return await new Promise((resolve, reject) => {
       canvas.toBlob(blob => {
         let reader = new FileReader()
