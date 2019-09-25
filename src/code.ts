@@ -48,4 +48,4 @@ cropNodes(figma.currentPage.selection).then(results => {
   } else {
     figma.closePlugin()
   }
-}
+})
