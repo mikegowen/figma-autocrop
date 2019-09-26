@@ -1,2 +1,4 @@
 dist/
 node_modules/
+code.js
+autocropper.js
