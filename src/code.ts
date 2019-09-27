@@ -8,7 +8,9 @@ async function cropNodes(nodes) {
     let error = {}
     error.node = node.name
 
-    if (Autocropper.isValidNode(node)) {
+    const nodeValidity = Autocropper.validateNode(node)
+
+    if (nodeValidity.status == 'valid') {
       const autocropper = new Autocropper(node, 50, 90)
       const response = await autocropper.crop()
 
@@ -17,7 +19,7 @@ async function cropNodes(nodes) {
         errors.push(error)
       }
     } else {
-      error.status = 'multiple-image-fill'
+      error.status = nodeValidity.status
       errors.push(error)
     }
   }
@@ -28,7 +30,13 @@ async function cropNodes(nodes) {
 cropNodes(figma.currentPage.selection).then(results => {
   const errorMessagesHTML = results.map(result => {
     switch (result.status) {
-      case 'multiple-image-fill':
+      case 'invalid-node-type':
+        return `<li class='type--pos-small-normal'>Layer <span class='type--pos-small-bold'>${result.node}</span> is an unsupported layer type.</li>`
+        break
+      case 'no-image-fills':
+        return `<li class='type--pos-small-normal'>Layer <span class='type--pos-small-bold'>${result.node}</span> has no image fills.</li>`
+        break
+      case 'multiple-image-fills':
         return `<li class='type--pos-small-normal'>Layer <span class='type--pos-small-bold'>${result.node}</span> contains more than 1 image fill.</li>`
         break
       case 'no-remaining-image':

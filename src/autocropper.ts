@@ -90,9 +90,28 @@ class Autocropper {
     return response
   }
 
-  static isValidNode(node) {
+  static validateNode(node) {
+    const nodeValidity = {}
+
+    if (node.type != 'RECTANGLE') {
+      nodeValidity.status = 'invalid-node-type'
+      return nodeValidity
+    }
+
     const imagePaintCount = node.fills.filter(paint => paint.type === 'IMAGE').length
-    return imagePaintCount === 1
+
+    if (imagePaintCount == 0) {
+      nodeValidity.status = 'no-image-fills'
+      return nodeValidity
+    }
+
+    if (imagePaintCount != 1) {
+      nodeValidity.status = 'multiple-image-fills'
+      return nodeValidity
+    }
+
+    nodeValidity.status = 'valid'
+    return nodeValidity
   }
 }
 
