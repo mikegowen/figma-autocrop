@@ -4,7 +4,7 @@ import errorsHTML from './errors.html'
 async function cropNodes(nodes) {
   let errors = []
 
-  for(const node of nodes) {
+  for (const node of nodes) {
     let error = {}
     error.node = node.name
 
@@ -41,7 +41,7 @@ cropNodes(figma.currentPage.selection).then(results => {
         break
       case 'no-remaining-image':
         return `<li class='type--pos-small-normal'>Layer <span class='type--pos-small-bold'>${result.node}</span> would have no image remaining after being cropped.</li>`
-        break 
+        break
       case 'nothing-to-crop':
         return `<li class='type--pos-small-normal'>Layer <span class='type--pos-small-bold'>${result.node}</span> doesn\'t have anything to crop.</li>`
         break
