@@ -10,7 +10,7 @@
     "build": "npm run webpack -- --mode production",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Mike Gowen",
   "license": "MIT",
   "devDependencies": {
     "css-loader": "^3.2.0",
