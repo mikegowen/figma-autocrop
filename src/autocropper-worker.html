@@ -1,4 +1,6 @@
 <script>
+  // TODO Don't think I need to do this in script tags, if webpack ends up
+  // bundling and including the js in the html script tag.
   class AutocropperWorker {
     constructor(image, imageBytes, backgroundMargin, colorPercentage) {
       this._imageBytes = imageBytes
@@ -15,6 +17,7 @@
       canvas.height = this._image.height
       context.drawImage(this._image, 0, 0)
 
+      // TODO Is _imageData same as _imageBytes?
       this._imageData = context.getImageData(0, 0, this._image.width, this._image.height)
       this._backgroundColor = this._getBackgroundColor()
 
