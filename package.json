@@ -13,15 +13,15 @@
   "author": "Mike Gowen",
   "license": "MIT",
   "devDependencies": {
-    "css-loader": "^3.2.0",
-    "html-loader": "^0.5.5",
+    "css-loader": "^6.7.3",
+    "html-loader": "^4.2.0",
     "html-webpack-inline-source-plugin": "0.0.10",
-    "html-webpack-plugin": "^3.2.0",
-    "style-loader": "^1.0.0",
-    "ts-loader": "^6.0.4",
+    "html-webpack-plugin": "^5.5.0",
+    "style-loader": "^1.3.0",
+    "ts-loader": "^9.4.2",
     "typescript": "^3.5.3",
-    "url-loader": "^2.1.0",
-    "webpack": "^4.39.1",
-    "webpack-cli": "^3.3.6"
+    "url-loader": "^4.1.1",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1"
   }
 }
